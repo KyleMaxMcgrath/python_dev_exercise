@@ -4,6 +4,8 @@ from flask_cors import CORS
 
 import pandas as pd
 
+import json
+
 app = Flask(__name__)
 cors = CORS(app, resources={r"/search/": {"origins": "*"}})
 
@@ -25,6 +27,12 @@ while i < len(df):
 def home():
     search_term = request.get_json(force=True)
     result = df.loc[df['PatientFirstName'] == search_term]
-    return result.transpose().to_json()
+    
+    results = []
+
+    for patientId in result['PatientID'].unique():
+        results.append(result.loc[result['PatientID'] == patientId].transpose().to_json())
+    
+    return json.dumps(results)
 
 app.run(host="127.0.0.1", port=5000)
